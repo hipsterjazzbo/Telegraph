@@ -18,7 +18,7 @@ class Gcm implements Service
     public function __construct(array $config)
     {
         $this->client = new Client();
-        $this->client->setApiKey($config['apikey']);
+        $this->client->setApiKey(array_get($config, 'key'));
     }
 
     public function push(Pushable $pushable, Message $message)

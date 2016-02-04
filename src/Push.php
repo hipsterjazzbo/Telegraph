@@ -2,17 +2,27 @@
 
 namespace HipsterJazzbo\Telegraph;
 
-use HipsterJazzbo\Telegraph\Services\Service;
-use HipsterJazzbo\Telegraph\Services\Factory;
 use HipsterJazzbo\Telegraph\Exceptions\InvalidServiceException;
+use HipsterJazzbo\Telegraph\Services\Factory;
+use HipsterJazzbo\Telegraph\Services\Service;
 use InvalidArgumentException;
 
 class Push
 {
     /**
+     * @var bool
+     */
+    private $strict;
+
+    /**
      * @var Service[]
      */
     private $services = [];
+
+    /**
+     * @var array
+     */
+    private $configs = [];
 
     /**
      * @var Message
@@ -20,16 +30,12 @@ class Push
     private $message;
 
     /**
-     * @var bool
+     * @param array $config
      */
-    private $strict;
-
-    /**
-     * @param bool $strict
-     */
-    public function __construct($strict = false)
+    public function __construct(array $config)
     {
-        $this->strict = $strict;
+        $this->strict  = array_get($config, 'strict', false);
+        $this->configs = array_get($config, 'services', []);
     }
 
     public function __destruct()
@@ -80,7 +86,7 @@ class Push
     {
         if (! isset($this->services[$service])) {
             try {
-                $this->services[$service] = Factory::make($service);
+                $this->services[$service] = Factory::make($service, array_get($this->configs, $service, []));
             } catch (InvalidServiceException $e) {
                 if ($this->strict) {
                     throw new InvalidServiceException;

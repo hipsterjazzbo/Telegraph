@@ -2,6 +2,7 @@
 
 namespace HipsterJazzbo\Telegraph\Services;
 
+use Exception;
 use HipsterJazzbo\Telegraph\Exceptions\InvalidServiceException;
 
 class Factory
@@ -11,14 +12,18 @@ class Factory
         'gcm'
     ];
 
-    public static function make($service)
+    public static function make($service, $config = [])
     {
         if (! in_array($service, self::$validServices)) {
             throw new InvalidServiceException;
         }
 
-        $adaptorClass = '\\HipsterJazzbo\\Telegraph\\Adaptors\\' . studly_case($service);
+        $serviceClass = '\\HipsterJazzbo\\Telegraph\\Services\\' . studly_case($service);
 
-        return new $adaptorClass;
+        try {
+            return new $serviceClass($config);
+        } catch (Exception $e) {
+            throw new InvalidServiceException;
+        }
     }
 }

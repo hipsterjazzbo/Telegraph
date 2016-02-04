@@ -29,8 +29,8 @@ class Message
     public function __construct($title, $body, array $data = [])
     {
         $this->title = $title;
-        $this->body = $body;
-        $this->data = $data;
+        $this->body  = $body;
+        $this->data  = $data;
     }
 
     /**

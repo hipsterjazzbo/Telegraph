@@ -21,7 +21,14 @@ class Apns implements Service
     public function __construct(array $config)
     {
         $this->client = new Client;
-        $this->client->open(Client::SANDBOX_URI, $config['certificate'], $config['passphrase']);
+
+        $environment = ! array_get($config, 'sandbox', true) ? Client::PRODUCTION_URI : Client::SANDBOX_URI;
+        
+        $certificate = is_callable(array_get($config, 'certificate'))
+            ? call_user_func(array_get($config, 'certificate'))
+            : array_get($config, 'certificate');
+
+        $this->client->open($environment, $certificate, array_get($config, 'passphrase'));
     }
 
     public function push(Pushable $pushable, Message $message)
