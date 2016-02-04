@@ -1,0 +1,55 @@
+{
+    "name": "hipsterjazzbo/telegraph",
+    "type": "library",
+    "description": "Easy push notifications",
+    "keywords": [
+        "hipsterjazzbo",
+        "telegraph"
+    ],
+    "homepage": "https://github.com/hipsterjazzbo/telegraph",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Caleb Fidecaro",
+            "email": "calebfidecaro@gmail.com",
+            "homepage": "http://hipsterjazzbo.com",
+            "role": "Developer"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/HipsterJazzbo/ZendService_Google_Gcm"
+        }
+    ],
+    "require": {
+        "php" : "~5.5|~7.0",
+        "zendframework/zendservice-apple-apns": "^1.2",
+        "zendframework/zendservice-google-gcm": "dev-patch-1",
+        "illuminate/support": "^5.2",
+        "ramsey/uuid": "^3.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit" : "4.*",
+        "scrutinizer/ocular": "~1.1",
+        "squizlabs/php_codesniffer": "~2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "HipsterJazzbo\\Telegraph\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HipsterJazzbo\\Telegraph\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
