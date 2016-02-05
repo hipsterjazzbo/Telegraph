@@ -2,7 +2,9 @@
 
 namespace HipsterJazzbo\Telegraph\Services;
 
+use HipsterJazzbo\Telegraph\Exceptions\ServiceException;
 use HipsterJazzbo\Telegraph\Message;
+use HipsterJazzbo\Telegraph\Push;
 use HipsterJazzbo\Telegraph\Pushable;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
@@ -18,12 +20,20 @@ class Apns implements Service
      */
     private $client;
 
-    public function __construct(array $config)
+    /**
+     * @var callable|null
+     */
+    private $removeCallback;
+
+    public function __construct(Push $push)
     {
-        $this->client = new Client;
+        $this->client         = new Client;
+        $this->removeCallback = $push->getRemoveCallback();
+
+        $config = $push->getConfig('apns');
 
         $environment = ! array_get($config, 'sandbox', true) ? Client::PRODUCTION_URI : Client::SANDBOX_URI;
-        
+
         $certificate = is_callable(array_get($config, 'certificate'))
             ? call_user_func(array_get($config, 'certificate'))
             : array_get($config, 'certificate');
@@ -44,37 +54,56 @@ class Apns implements Service
         $apnsMessage->setCustom($message->getData());
 
         try {
-            $response = $this->client->send($message);
+            $response = $this->client->send($apnsMessage);
+            $error    = false;
 
             if ($response->getCode() != Response::RESULT_OK) {
                 switch ($response->getCode()) {
                     case Response::RESULT_PROCESSING_ERROR:
                         // you may want to retry
                         break;
-                    case Response::RESULT_MISSING_TOKEN:
-                        // you were missing a token
-                        break;
-                    case Response::RESULT_MISSING_TOPIC:
-                        // you are missing a message id
-                        break;
-                    case Response::RESULT_MISSING_PAYLOAD:
-                        // you need to send a payload
-                        break;
-                    case Response::RESULT_INVALID_TOKEN_SIZE:
-                        // the token provided was not of the proper size
-                        break;
-                    case Response::RESULT_INVALID_TOPIC_SIZE:
-                        // the topic was too long
-                        break;
-                    case Response::RESULT_INVALID_PAYLOAD_SIZE:
-                        // the payload was too large
-                        break;
+
                     case Response::RESULT_INVALID_TOKEN:
-                        // the token was invalid; remove it from your system
+                        if (is_callable($this->removeCallback)) {
+                            call_user_func($this->removeCallback, $pushable);
+                        }
                         break;
+
+                    case Response::RESULT_MISSING_TOKEN:
+                        $error = "You were missing a token";
+                        break;
+
+                    case Response::RESULT_MISSING_TOPIC:
+                        $error = "You are missing a message id";
+                        break;
+
+                    case Response::RESULT_MISSING_PAYLOAD:
+                        $error = "You need to send a payload";
+                        break;
+
+                    case Response::RESULT_INVALID_TOKEN_SIZE:
+                        $error = "The token provided was not of the proper size";
+                        break;
+
+                    case Response::RESULT_INVALID_TOPIC_SIZE:
+                        $error = "The topic was too long";
+                        break;
+
+                    case Response::RESULT_INVALID_PAYLOAD_SIZE:
+                        $error = "The payload was too large";
+                        break;
+
                     case Response::RESULT_UNKNOWN_ERROR:
-                        // apple didn't tell us what happened
+                        $error = "Apple didn't tell us what happened";
                         break;
+
+                    default:
+                        $error = "Unknown error";
+                        break;
+                }
+
+                if ($error) {
+                    throw new ServiceException('apns', $error);
                 }
             }
         } catch (RuntimeException $e) {

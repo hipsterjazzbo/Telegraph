@@ -3,12 +3,28 @@
 namespace HipsterJazzbo\Telegraph;
 
 use HipsterJazzbo\Telegraph\Exceptions\InvalidServiceException;
+use HipsterJazzbo\Telegraph\Exceptions\ServiceException;
 use HipsterJazzbo\Telegraph\Services\Factory;
 use HipsterJazzbo\Telegraph\Services\Service;
 use InvalidArgumentException;
 
 class Push
 {
+    /**
+     * @var array
+     */
+    private $configs = [];
+
+    /**
+     * @var callable
+     */
+    private $removeCallback;
+
+    /**
+     * @var callable
+     */
+    private $updateCallback;
+
     /**
      * @var bool
      */
@@ -20,22 +36,23 @@ class Push
     private $services = [];
 
     /**
-     * @var array
-     */
-    private $configs = [];
-
-    /**
      * @var Message
      */
     private $message;
 
     /**
-     * @param array $config
+     * @param array    $configs
+     * @param callable $remove
+     * @param callable $update
+     * @param bool     $strict
      */
-    public function __construct(array $config)
+    public function __construct(array $configs, callable $remove = null, callable $update = null, $strict = false)
     {
-        $this->strict  = array_get($config, 'strict', false);
-        $this->configs = array_get($config, 'services', []);
+
+        $this->configs        = $configs;
+        $this->removeCallback = $remove;
+        $this->updateCallback = $update;
+        $this->strict         = $strict;
     }
 
     public function __destruct()
@@ -43,6 +60,36 @@ class Push
         foreach ($this->services as $service) {
             $service->disconnect();
         }
+    }
+
+    /**
+     * @param string $service
+     *
+     * @return array
+     */
+    public function getConfig($service)
+    {
+        if (! array_key_exists($service, $this->configs)) {
+            throw new InvalidServiceException;
+        }
+
+        return $this->configs[$service];
+    }
+
+    /**
+     * @return callable
+     */
+    public function getRemoveCallback()
+    {
+        return $this->removeCallback;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getUpdateCallback()
+    {
+        return $this->updateCallback;
     }
 
     /**
@@ -71,8 +118,8 @@ class Push
         }
 
         foreach ($pushables as $pushable) {
-            if ($adaptor = $this->getAdaptor($pushable->getService())) {
-                $this->push($adaptor, $pushable, $this->message);
+            if ($service = $this->getService($pushable->getService())) {
+                $this->push($service, $pushable, $this->message);
             }
         }
     }
@@ -82,14 +129,14 @@ class Push
      *
      * @return bool|Service
      */
-    protected function getAdaptor($service)
+    protected function getService($service)
     {
         if (! isset($this->services[$service])) {
             try {
-                $this->services[$service] = Factory::make($service, array_get($this->configs, $service, []));
+                $this->services[$service] = Factory::make($service, $this);
             } catch (InvalidServiceException $e) {
                 if ($this->strict) {
-                    throw new InvalidServiceException;
+                    throw $e;
                 }
 
                 return false;
@@ -103,9 +150,21 @@ class Push
      * @param Service  $service
      * @param Pushable $pushable
      * @param Message  $message
+     *
+     * @return array
      */
     protected function push(Service $service, Pushable $pushable, Message $message)
     {
-        $service->push($pushable, $message);
+        try {
+            $service->push($pushable, $message);
+        } catch (ServiceException $e) {
+            if ($this->strict) {
+                throw $e;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

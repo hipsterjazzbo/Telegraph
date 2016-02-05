@@ -36,4 +36,30 @@ return [
 
     'strict' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Removal Callback
+    |--------------------------------------------------------------------------
+    |
+    | A callback to remove a device if instructed to do so by a service
+    |
+    */
+
+    'remove' => function (\HipsterJazzbo\Telegraph\Pushable $device) {
+        //
+    },
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Callback
+    |--------------------------------------------------------------------------
+    |
+    | A callback to update a device's token if instructed to do so by a service
+    |
+    */
+
+    'update' => function (\HipsterJazzbo\Telegraph\Pushable $device, $newToken) {
+        //
+    },
+
 ];

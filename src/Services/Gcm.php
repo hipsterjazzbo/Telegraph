@@ -2,7 +2,9 @@
 
 namespace HipsterJazzbo\Telegraph\Services;
 
+use HipsterJazzbo\Telegraph\Exceptions\ServiceException;
 use HipsterJazzbo\Telegraph\Message;
+use HipsterJazzbo\Telegraph\Push;
 use HipsterJazzbo\Telegraph\Pushable;
 use RuntimeException;
 use ZendService\Google\Gcm\Client;
@@ -15,13 +17,28 @@ class Gcm implements Service
      */
     private $client;
 
-    public function __construct(array $config)
+    /**
+     * @var callable
+     */
+    private $removeCallback;
+
+    /**
+     * @var callable
+     */
+    private $updateCallback;
+
+    public function __construct(Push $push)
     {
+        $config = $push->getConfig('gcm');
+
         $this->client = new Client();
         $this->client->setApiKey(array_get($config, 'key'));
+
+        $this->removeCallback = $push->getRemoveCallback();
+        $this->updateCallback = $push->getUpdateCallback();
     }
 
-    public function push(Pushable $pushable, Message $message)
+    public function push(Pushable $pushable, Message $message, callable $failure = null)
     {
         $gcmMessage = new GcmMessage();
         $gcmMessage->addRegistrationId($pushable->getToken());
@@ -31,10 +48,25 @@ class Gcm implements Service
 
         try {
             $response = $this->client->send($gcmMessage);
+            $results  = $response->getResults();
+            $result   = $results[$pushable->getToken()];
 
-            echo 'Successful: ' . $response->getSuccessCount() . PHP_EOL;
-            echo 'Failures: ' . $response->getFailureCount() . PHP_EOL;
-            echo 'Canonicals: ' . $response->getCanonicalCount() . PHP_EOL;
+            if (isset($result['message_id']) && isset($result['registration_id'])) {
+                call_user_func($this->updateCallback, $pushable, $result['registration_id']);
+            } elseif (isset($result['error'])) {
+                switch ($result['error']) {
+                    case 'Unavailable':
+                        // retry
+                        break;
+
+                    case 'NotRegistered':
+                        call_user_func($this->removeCallback, $pushable);
+                        break;
+
+                    default:
+                        throw new ServiceException('gcm', $result['error']);
+                }
+            }
         } catch (RuntimeException $e) {
             //
         }

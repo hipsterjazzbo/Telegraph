@@ -32,7 +32,12 @@ class TelegraphServiceProvider extends ServiceProvider
         $this->app->singleton(Push::class, function (Application $app) {
             $config = $app['config']->get('telegraph');
 
-            return new Push($config);
+            $configs = array_get($config, 'services', []);
+            $remove  = array_get($config, 'remove');
+            $update  = array_get($config, 'update');
+            $strict  = array_get($config, 'strict', false);
+
+            return new Push($configs, $remove, $update, $strict);
         });
     }
 }
