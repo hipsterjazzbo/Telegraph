@@ -32,7 +32,7 @@ class Apns implements Service
 
         $config = $push->getConfig('apns');
 
-        $environment = ! array_get($config, 'sandbox', true) ? Client::PRODUCTION_URI : Client::SANDBOX_URI;
+        $environment = ! array_get($config, 'sandbox', true) ? 1 : 0;
 
         $certificate = is_callable(array_get($config, 'certificate'))
             ? call_user_func(array_get($config, 'certificate'))
@@ -48,7 +48,7 @@ class Apns implements Service
         $alert->setBody($message->getBody());
 
         $apnsMessage = new ApnsMessage();
-        $apnsMessage->setId(Uuid::uuid4());
+        $apnsMessage->setId((string) Uuid::uuid4());
         $apnsMessage->setToken($pushable->getToken());
         $apnsMessage->setAlert($alert);
         $apnsMessage->setCustom($message->getData());
