@@ -61,41 +61,14 @@ class Push
         $this->strict         = $strict;
     }
 
+    /**
+     * Make sure all services are properly disconnected
+     */
     public function __destruct()
     {
         foreach ($this->services as $service) {
             $service->disconnect();
         }
-    }
-
-    /**
-     * @param string $service
-     *
-     * @return array
-     */
-    public function getConfig($service)
-    {
-        if (! array_key_exists($service, $this->configs)) {
-            throw new InvalidServiceException;
-        }
-
-        return $this->configs[$service];
-    }
-
-    /**
-     * @return callable
-     */
-    public function getRemoveCallback()
-    {
-        return $this->removeCallback;
-    }
-
-    /**
-     * @return callable
-     */
-    public function getUpdateCallback()
-    {
-        return $this->updateCallback;
     }
 
     /**
@@ -172,6 +145,36 @@ class Push
         }
 
         return true;
+    }
+
+    /**
+     * @param string $service
+     *
+     * @return array
+     */
+    public function getConfig($service)
+    {
+        if (! array_key_exists($service, $this->configs)) {
+            throw new InvalidServiceException;
+        }
+
+        return $this->configs[$service];
+    }
+
+    /**
+     * @return callable
+     */
+    public function getRemoveCallback()
+    {
+        return $this->removeCallback;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getUpdateCallback()
+    {
+        return $this->updateCallback;
     }
 
     /**
