@@ -42,7 +42,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "HipsterJazzbo\\Telegraph\\Test\\": "tests"
+            "HipsterJazzbo\\Telegraph\\Tests\\": "tests"
         }
     },
     "scripts": {

@@ -62,16 +62,6 @@ class Push
     }
 
     /**
-     * Make sure all services are properly disconnected
-     */
-    public function __destruct()
-    {
-        foreach ($this->services as $service) {
-            $service->disconnect();
-        }
-    }
-
-    /**
      * @param string|Message $message
      * @param string         $title
      *
@@ -122,6 +112,8 @@ class Push
      */
     public function send()
     {
+        $success = true;
+
         foreach ($this->pushables as $pushable) {
             if ($service = $this->getService($pushable->getService())) {
                 try {
@@ -131,20 +123,20 @@ class Push
                         throw $e;
                     }
 
-                    return false;
+                    $success = false;
                 }
-
-                return true;
             } else {
                 if ($this->strict) {
                     throw new InvalidServiceException('Missing service: ' . $pushable->getService());
                 }
 
-                return false;
+                $success = false;
             }
         }
 
-        return true;
+        $this->disconnect();
+
+        return $success;
     }
 
     /**
@@ -197,5 +189,15 @@ class Push
         }
 
         return $this->services[$service];
+    }
+
+    /**
+     * Make sure all services are properly disconnected
+     */
+    protected function disconnect()
+    {
+        foreach ($this->services as $service) {
+            $service->disconnect();
+        }
     }
 }

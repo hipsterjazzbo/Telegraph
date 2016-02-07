@@ -5,10 +5,18 @@ namespace HipsterJazzbo\Telegraph\Tests;
 use HipsterJazzbo\Telegraph\Message;
 use HipsterJazzbo\Telegraph\Push;
 use HipsterJazzbo\Telegraph\PushableCollection;
+use HipsterJazzbo\Telegraph\Tests\Utils\TestsService;
 use Mockery as m;
 
 class PushTest extends \PHPUnit_Framework_TestCase
 {
+    use TestsService;
+
+    public function tearDown()
+    {
+        m::close();
+    }
+
     public function testTo()
     {
         $service = m::mock('HipsterJazzbo\Telegraph\Services\Apns');
@@ -19,13 +27,13 @@ class PushTest extends \PHPUnit_Framework_TestCase
         $factory->shouldReceive('make')->once()->andReturn($service);
 
         $configs = [
-            'sandbox'     => true,
-            'certificate' => 'certificate.pem'
+            'apns' => [
+                'sandbox'     => true,
+                'certificate' => 'certificate.pem'
+            ]
         ];
 
-        $pushable = m::mock('HipsterJazzbo\Telegraph\Pushable');
-        $pushable->shouldReceive('getToken')->andReturn('1');
-        $pushable->shouldReceive('getServiceName')->andReturn('apns');
+        $pushable = $this->getPushableMock('apns');
 
         $pushables = new PushableCollection([$pushable]);
 

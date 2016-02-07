@@ -64,7 +64,7 @@ class Gcm extends AbstractService
         $client = new Client();
         $client->setApiKey(array_get($this->config, 'key'));
 
-        return $this->client->send($serviceMessage);
+        return $client->send($serviceMessage);
     }
 
     /**
@@ -72,7 +72,7 @@ class Gcm extends AbstractService
      *
      * @param \HipsterJazzbo\Telegraph\Pushable $pushable
      * @param \HipsterJazzbo\Telegraph\Message  $message
-     * @param                                   $response
+     * @param \ZendService\Google\Gcm\Response  $response
      */
     protected function handleResponse(Pushable $pushable, Message $message, $response)
     {
