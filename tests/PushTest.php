@@ -25,11 +25,11 @@ class PushTest extends \PHPUnit_Framework_TestCase
 
         $pushable = m::mock('HipsterJazzbo\Telegraph\Pushable');
         $pushable->shouldReceive('getToken')->andReturn('1');
-        $pushable->shouldReceive('getService')->andReturn('apns');
+        $pushable->shouldReceive('getServiceName')->andReturn('apns');
 
         $pushables = new PushableCollection([$pushable]);
 
-        $message = new Message('Test Title', 'Test Body');
+        $message = new Message('Test Body', 'Test Title');
 
         $push = new Push($configs);
         $push->message($message)->to($pushables);

@@ -28,7 +28,7 @@ class Gcm extends AbstractService
      *
      * @return string
      */
-    protected function getService()
+    protected function getServiceName()
     {
         return 'gcm';
     }

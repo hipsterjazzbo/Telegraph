@@ -31,7 +31,7 @@ class Apns extends AbstractService
      *
      * @return string
      */
-    protected function getService()
+    protected function getServiceName()
     {
         return 'apns';
     }

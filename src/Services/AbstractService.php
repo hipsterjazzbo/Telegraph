@@ -42,7 +42,7 @@ abstract class AbstractService implements Service
      */
     public function __construct(Push $push)
     {
-        $this->config = $push->getConfig($this->getService());
+        $this->config = $push->getConfig($this->getServiceName());
 
         $this->removeCallback = $push->getRemoveCallback();
 
@@ -68,7 +68,7 @@ abstract class AbstractService implements Service
 
             $this->handleResponse($pushable, $message, $response);
         } catch (RuntimeException $e) {
-            throw new ServiceException($this->getService(), 'Failed to send service message');
+            throw new ServiceException($this->getServiceName(), 'Failed to send service message');
         }
     }
 
@@ -88,7 +88,7 @@ abstract class AbstractService implements Service
 
             $this->push($pushable, $message);
         } else {
-            throw new ServiceException($this->getService(), 'Exceeded maximum retries');
+            throw new ServiceException($this->getServiceName(), 'Exceeded maximum retries');
         }
     }
 
@@ -97,7 +97,7 @@ abstract class AbstractService implements Service
      *
      * @return string
      */
-    abstract protected function getService();
+    abstract protected function getServiceName();
 
     /**
      * Build the service-specific message from the Telegraph Message
