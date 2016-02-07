@@ -22,11 +22,11 @@ class Message
     /**
      * Message constructor.
      *
-     * @param string $title
      * @param string $body
+     * @param string $title
      * @param array  $data
      */
-    public function __construct($title, $body, array $data = [])
+    public function __construct($body, $title = '', array $data = [])
     {
         $this->title = $title;
         $this->body  = $body;

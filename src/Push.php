@@ -3,6 +3,7 @@
 namespace HipsterJazzbo\Telegraph;
 
 use HipsterJazzbo\Telegraph\Exceptions\InvalidServiceException;
+use HipsterJazzbo\Telegraph\Exceptions\MissingMessageException;
 use HipsterJazzbo\Telegraph\Exceptions\ServiceException;
 use HipsterJazzbo\Telegraph\Services\Factory;
 use HipsterJazzbo\Telegraph\Services\Service;
@@ -13,32 +14,37 @@ class Push
     /**
      * @var array
      */
-    private $configs = [];
+    protected $configs = [];
 
     /**
      * @var callable
      */
-    private $removeCallback;
+    protected $removeCallback;
 
     /**
      * @var callable
      */
-    private $updateCallback;
+    protected $updateCallback;
 
     /**
      * @var bool
      */
-    private $strict;
+    protected $strict;
 
     /**
      * @var Service[]
      */
-    private $services = [];
+    protected $services = [];
 
     /**
      * @var Message
      */
-    private $message;
+    protected $message;
+
+    /**
+     * @var PushableCollection
+     */
+    protected $pushables;
 
     /**
      * @param array    $configs
@@ -93,12 +99,17 @@ class Push
     }
 
     /**
-     * @param Message $message
+     * @param string|Message $message
+     * @param string         $title
      *
      * @return $this
      */
-    public function message(Message $message)
+    public function message($message, $title = '')
     {
+        if (is_string($message)) {
+            $message = new Message($message, $title);
+        }
+
         $this->message = $message;
 
         return $this;
@@ -106,9 +117,16 @@ class Push
 
     /**
      * @param PushableCollection|Pushable $pushables
+     * @param bool                        $sendNow
+     *
+     * @return $this|bool
      */
-    public function to($pushables)
+    public function to($pushables, $sendNow = true)
     {
+        if (! $this->message) {
+            throw new MissingMessageException;
+        }
+
         if ($pushables instanceof Pushable) {
             $pushables = new PushableCollection($pushables);
         }
@@ -117,11 +135,43 @@ class Push
             throw new InvalidArgumentException;
         }
 
-        foreach ($pushables as $pushable) {
+        $this->pushables = $pushables;
+
+        if ($sendNow) {
+            return $this->send();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function send()
+    {
+        foreach ($this->pushables as $pushable) {
             if ($service = $this->getService($pushable->getService())) {
-                $this->push($service, $pushable, $this->message);
+                try {
+                    $service->push($pushable, $this->message);
+                } catch (ServiceException $e) {
+                    if ($this->strict) {
+                        throw $e;
+                    }
+
+                    return false;
+                }
+
+                return true;
+            } else {
+                if ($this->strict) {
+                    throw new InvalidServiceException('Missing service: ' . $pushable->getService());
+                }
+
+                return false;
             }
         }
+
+        return true;
     }
 
     /**
@@ -144,27 +194,5 @@ class Push
         }
 
         return $this->services[$service];
-    }
-
-    /**
-     * @param Service  $service
-     * @param Pushable $pushable
-     * @param Message  $message
-     *
-     * @return array
-     */
-    protected function push(Service $service, Pushable $pushable, Message $message)
-    {
-        try {
-            $service->push($pushable, $message);
-        } catch (ServiceException $e) {
-            if ($this->strict) {
-                throw $e;
-            }
-
-            return false;
-        }
-
-        return true;
     }
 }
