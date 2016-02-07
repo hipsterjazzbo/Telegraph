@@ -11,11 +11,6 @@ use ZendService\Google\Gcm\Message as GcmMessage;
 class Gcm extends AbstractService
 {
     /**
-     * @var \ZendService\Google\Gcm\Client
-     */
-    private $client;
-
-    /**
      * Doesn't need to do anything for GCM
      */
     public function disconnect()

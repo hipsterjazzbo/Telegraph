@@ -68,7 +68,8 @@ class Apns extends AbstractService
      */
     protected function send($serviceMessage)
     {
-        $client = new Client;
+        // So that we can close it later
+        $this->client = new Client;
 
         $environment = ! array_get($this->config, 'sandbox', true) ? 1 : 0;
 
@@ -76,9 +77,9 @@ class Apns extends AbstractService
             ? call_user_func(array_get($this->config, 'certificate'))
             : array_get($this->config, 'certificate');
 
-        $client->open($environment, $certificate, array_get($this->config, 'passphrase'));
+        $this->client->open($environment, $certificate, array_get($this->config, 'passphrase'));
 
-        return $client->send($serviceMessage);
+        return $this->client->send($serviceMessage);
     }
 
     /**
@@ -138,7 +139,7 @@ class Apns extends AbstractService
             }
         }
 
-        if ($error) {
+        if ($error !== false) {
             throw new ServiceException('apns', $error);
         }
     }
