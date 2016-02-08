@@ -18,7 +18,7 @@ class TelegraphServiceProvider extends ServiceProvider
         $configPath = function_exists('config_path') ? config_path('telegraph.php') : 'telegraph.php';
 
         $this->publishes([
-            realpath(__DIR__ . '/../config/telegraph.php') => $configPath
+            realpath(__DIR__ . '/../../config/telegraph.php') => $configPath
         ]);
     }
 

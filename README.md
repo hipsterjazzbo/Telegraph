@@ -21,8 +21,11 @@ $ composer require hipsterjazzbo/telegraph
 ## Usage
 
 ``` php
-$skeleton = new League\Skeleton();
-echo $skeleton->echoPhrase('Hello, League!');
+$push = new \HipsterJazzbo\Telegraph\Push($serviceConfigs);
+$message = new \HipsterJazzbo\Telegraph\Message($body, $title = '', $data = []);
+$devices = new \HipsterJazzbo\Telegraph\PushCollection($pushables);
+
+$push->message($message)->to($devices);
 ```
 
 ## Change log
