@@ -46,15 +46,18 @@ class Apns extends AbstractService
      */
     protected function buildServiceMessage(Pushable $pushable, Message $message)
     {
-        $alert = new Alert();
-        $alert->setTitle($message->getTitle());
-        $alert->setBody($message->getBody());
-
         $apnsMessage = new ApnsMessage();
         $apnsMessage->setId((string)Uuid::uuid4());
         $apnsMessage->setToken($pushable->getToken());
-        $apnsMessage->setAlert($alert);
         $apnsMessage->setCustom($message->getData());
+
+        if ($message->getBody()) {
+            $alert = new Alert();
+            $alert->setTitle($message->getTitle());
+            $alert->setBody($message->getBody());
+
+            $apnsMessage->setAlert($alert);
+        }
 
         return $apnsMessage;
     }

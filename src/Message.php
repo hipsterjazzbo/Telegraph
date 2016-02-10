@@ -26,7 +26,7 @@ class Message
      * @param string $title
      * @param array  $data
      */
-    public function __construct($body, $title = '', array $data = [])
+    public function __construct($body = '', $title = '', array $data = [])
     {
         $this->title = $title;
         $this->body  = $body;
