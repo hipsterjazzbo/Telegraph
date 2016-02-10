@@ -7,12 +7,12 @@ class Message
     /**
      * @var string
      */
-    private $title;
+    private $body;
 
     /**
      * @var string
      */
-    private $body;
+    private $title;
 
     /**
      * @var array
@@ -20,25 +20,72 @@ class Message
     private $data;
 
     /**
+     * @var int|null
+     */
+    private $badge;
+
+    /**
      * Message constructor.
      *
-     * @param string $body
-     * @param string $title
-     * @param array  $data
+     * @param string   $body
+     * @param string   $title
+     * @param array    $data
+     * @param int|null $badge
      */
-    public function __construct($body = '', $title = '', array $data = [])
+    public function __construct($body = '', $title = '', array $data = [], $badge = null)
     {
         $this->title = $title;
         $this->body  = $body;
         $this->data  = $data;
+        $this->badge = $badge;
     }
 
     /**
-     * @return string
+     * @param string $body
+     *
+     * @return Message
      */
-    public function getTitle()
+    public function setBody($body)
     {
-        return $this->title;
+        $this->body = $body;
+
+        return $this;
+    }
+
+    /**
+     * @param string $title
+     *
+     * @return Message
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return Message
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * @param int|null $badge
+     *
+     * @return Message
+     */
+    public function setBadge($badge)
+    {
+        $this->badge = $badge;
+
+        return $this;
     }
 
     /**
@@ -50,10 +97,26 @@ class Message
     }
 
     /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
      * @return array
      */
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getBadge()
+    {
+        return $this->badge;
     }
 }

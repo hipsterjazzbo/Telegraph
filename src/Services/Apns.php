@@ -51,12 +51,16 @@ class Apns extends AbstractService
         $apnsMessage->setToken($pushable->getToken());
         $apnsMessage->setCustom($message->getData());
 
-        if ($message->getBody()) {
+        if (! empty($message->getBody())) {
             $alert = new Alert();
             $alert->setTitle($message->getTitle());
             $alert->setBody($message->getBody());
 
             $apnsMessage->setAlert($alert);
+        }
+
+        if ($message->getBadge()) {
+            $apnsMessage->setBadge($message->getBadge());
         }
 
         return $apnsMessage;
