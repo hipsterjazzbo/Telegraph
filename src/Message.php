@@ -25,19 +25,26 @@ class Message
     private $badge;
 
     /**
+     * @var bool
+     */
+    private $silent;
+
+    /**
      * Message constructor.
      *
      * @param string   $body
      * @param string   $title
      * @param array    $data
      * @param int|null $badge
+     * @param bool     $silent
      */
-    public function __construct($body = '', $title = '', array $data = [], $badge = null)
+    public function __construct($body = '', $title = '', array $data = [], $badge = null, $silent = false)
     {
-        $this->title = $title;
-        $this->body  = $body;
-        $this->data  = $data;
-        $this->badge = $badge;
+        $this->title  = $title;
+        $this->body   = $body;
+        $this->data   = $data;
+        $this->badge  = $badge;
+        $this->silent = $silent;
     }
 
     /**
@@ -118,5 +125,25 @@ class Message
     public function getBadge()
     {
         return $this->badge;
+    }
+
+    /**
+     * @param boolean $silent
+     *
+     * @return Message
+     */
+    public function setSilent($silent)
+    {
+        $this->silent = $silent;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSilent()
+    {
+        return $this->silent;
     }
 }

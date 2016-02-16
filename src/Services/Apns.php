@@ -63,6 +63,10 @@ class Apns extends AbstractService
             $apnsMessage->setBadge($message->getBadge());
         }
 
+        if ($message->isSilent()) {
+            $apnsMessage->setContentAvailable(1);
+        }
+
         return $apnsMessage;
     }
 
