@@ -68,7 +68,12 @@ abstract class AbstractService implements Service
 
             $this->handleResponse($pushable, $message, $response);
         } catch (RuntimeException $e) {
-            throw new ServiceException($this->getServiceName(), 'Failed to send service message');
+            throw new ServiceException(
+                $this->getServiceName(),
+                'Failed to send service message',
+                $e->getCode(),
+                $e
+            );
         }
     }
 
