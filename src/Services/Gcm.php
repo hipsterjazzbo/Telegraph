@@ -75,7 +75,7 @@ class Gcm extends AbstractService
         $result  = $results[$pushable->getToken()];
 
         if (isset($result['message_id']) && isset($result['registration_id'])) {
-            call_user_func($this->updateCallback, $pushable, $result['registration_id']);
+            $pushable->updateToken($result['registration_id']);
         } elseif (isset($result['error'])) {
             switch ($result['error']) {
                 case 'Unavailable':
@@ -83,7 +83,7 @@ class Gcm extends AbstractService
                     break;
 
                 case 'NotRegistered':
-                    call_user_func($this->removeCallback, $pushable);
+                    $pushable->remove();
                     break;
 
                 default:

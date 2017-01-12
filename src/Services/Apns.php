@@ -111,9 +111,7 @@ class Apns extends AbstractService
                     break;
 
                 case Response::RESULT_INVALID_TOKEN:
-                    if (is_callable($this->removeCallback)) {
-                        call_user_func($this->removeCallback, $pushable);
-                    }
+                    $pushable->remove();
                     break;
 
                 case Response::RESULT_MISSING_TOKEN:

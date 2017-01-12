@@ -16,16 +16,6 @@ abstract class AbstractService implements Service
     protected $config;
 
     /**
-     * @var callable|null The callback to remove a pushable
-     */
-    protected $removeCallback;
-
-    /**
-     * @var callable|null The callback to update a pushable
-     */
-    protected $updateCallback;
-
-    /**
      * @var int How many times the push has been tried
      */
     protected $tries = 0;
@@ -43,10 +33,6 @@ abstract class AbstractService implements Service
     public function __construct(Push $push)
     {
         $this->config = $push->getConfig($this->getServiceName());
-
-        $this->removeCallback = $push->getRemoveCallback();
-
-        $this->updateCallback = $push->getUpdateCallback();
 
         $this->maxTries = array_get($this->config, 'retries', 3);
     }

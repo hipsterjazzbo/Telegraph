@@ -9,8 +9,6 @@ trait TestsService
     public function getPushMock()
     {
         $push = m::mock('HipsterJazzbo\Telegraph\Push');
-        $push->shouldReceive('getRemoveCallback')->andReturnNull();
-        $push->shouldReceive('getUpdateCallback')->andReturnNull();
         $push->shouldReceive('getConfig')->andReturn();
 
         return $push;
@@ -31,6 +29,8 @@ trait TestsService
         $message->shouldReceive('getTitle')->andReturn('Test Title');
         $message->shouldReceive('getBody')->andReturn('Test Body');
         $message->shouldReceive('getData')->andReturn([]);
+        $message->shouldReceive('getBadge')->andReturn(0);
+        $message->shouldReceive('isSilent')->andReturn(false);
 
         return $message;
     }

@@ -14,17 +14,7 @@ class Push
     /**
      * @var array
      */
-    protected $configs = [];
-
-    /**
-     * @var callable
-     */
-    protected $removeCallback;
-
-    /**
-     * @var callable
-     */
-    protected $updateCallback;
+    protected $serviceConfigs = [];
 
     /**
      * @var bool
@@ -47,18 +37,14 @@ class Push
     protected $pushables;
 
     /**
-     * @param array    $configs
-     * @param callable $remove
-     * @param callable $update
-     * @param bool     $strict
+     * @param array $serviceConfigs
+     * @param bool  $strict
      */
-    public function __construct(array $configs, callable $remove = null, callable $update = null, $strict = false)
+    public function __construct(array $serviceConfigs, $strict = false)
     {
+        $this->serviceConfigs = $serviceConfigs;
 
-        $this->configs        = $configs;
-        $this->removeCallback = $remove;
-        $this->updateCallback = $update;
-        $this->strict         = $strict;
+        $this->strict = $strict;
     }
 
     /**
@@ -82,11 +68,11 @@ class Push
      * @param PushableCollection|Pushable $pushables
      * @param bool                        $sendNow
      *
-     * @return $this|bool
+     * @return bool|self
      */
     public function to($pushables, $sendNow = true)
     {
-        if (! $this->message) {
+        if (!$this->message) {
             throw new MissingMessageException;
         }
 
@@ -94,7 +80,7 @@ class Push
             $pushables = new PushableCollection($pushables);
         }
 
-        if (! $pushables instanceof PushableCollection) {
+        if (!$pushables instanceof PushableCollection) {
             throw new InvalidArgumentException;
         }
 
@@ -127,7 +113,7 @@ class Push
                 }
             } else {
                 if ($this->strict) {
-                    throw new InvalidServiceException('Missing service: ' . $pushable->getService());
+                    throw new InvalidServiceException('Missing service: '.$pushable->getService());
                 }
 
                 $success = false;
@@ -146,27 +132,11 @@ class Push
      */
     public function getConfig($service)
     {
-        if (! array_key_exists($service, $this->configs)) {
+        if (!array_key_exists($service, $this->serviceConfigs)) {
             throw new InvalidServiceException;
         }
 
-        return $this->configs[$service];
-    }
-
-    /**
-     * @return callable
-     */
-    public function getRemoveCallback()
-    {
-        return $this->removeCallback;
-    }
-
-    /**
-     * @return callable
-     */
-    public function getUpdateCallback()
-    {
-        return $this->updateCallback;
+        return $this->serviceConfigs[$service];
     }
 
     /**
@@ -176,7 +146,7 @@ class Push
      */
     protected function getService($service)
     {
-        if (! isset($this->services[$service])) {
+        if (!isset($this->services[$service])) {
             try {
                 $this->services[$service] = Factory::make($service, $this);
             } catch (InvalidServiceException $e) {
